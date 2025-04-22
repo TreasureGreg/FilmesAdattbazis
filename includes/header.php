@@ -21,6 +21,8 @@
           $currentPage = $_GET['page'] ?? 'home';
 
           foreach ($menu as $key => $value) {
+            if ($key === 'login' && isset($_SESSION['user'])) continue;
+            if ($key === 'logout' && !isset($_SESSION['user'])) continue;
 
             $active = $key === $currentPage ? 'active' : '';
             echo "<li class='nav-item'>
@@ -34,3 +36,9 @@
     </div>
   </nav>
 
+  <div class="container flex-grow-1">
+    <?php if (isset($_SESSION['user'])): ?>
+      <div class="alert alert-success text-end" role="alert">
+        Bejelentkezett: <strong><?= $_SESSION['user']['name'] ?></strong> (<?= $_SESSION['user']['email'] ?>)
+      </div>
+    <?php endif; ?>
