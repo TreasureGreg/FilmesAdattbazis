@@ -1,5 +1,35 @@
+<?php include('includes/db.php');
+
+$name = '';
+$email = '';
+$message = '';
+$errors = [];
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $name = trim($_POST['name']);
+    $email = trim($_POST['email']);
+    $message = trim($_POST['message']);
+
+    if (strlen($name) < 2) $errors[] = "A név túl rövid.";
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = "Érvénytelen email.";
+    if (strlen($message) < 5) $errors[] = "Az üzenet túl rövid.";
+
+    if (empty($errors)) {
+        $stmt = $dbh->prepare("INSERT INTO messages (name, email, message, user_id) VALUES (?, ?, ?, ?)");
+        $userId = $_SESSION['user']['id'] ?? null;
+        $stmt->execute([$name, $email, $message, $userId]);
+        $_SESSION['last_message'] = ['name' => $name, 'email' => $email, 'message' => $message];
+        header("Location: index.php?page=contact-success");
+        exit;
+    }
+}
+?>
 
 <h2 class="mb-4">Kapcsolatfelvétel</h2>
+
+<?php foreach ($errors as $error): ?>
+  <div class="alert alert-danger"><?= $error ?></div>
+<?php endforeach; ?>
 
 <!-- űrlap eleje -->
 <form method="post" id="contactForm" novalidate onsubmit="return validateContactForm();">
